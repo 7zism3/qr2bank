@@ -1,0 +1,13 @@
+{
+  "name": "qr2bank",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node test/parser.test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

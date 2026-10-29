@@ -1,0 +1,6 @@
+{
+  "name": "qr2bank",
+  "compatibility_date": "2026-01-01",
+  "routes": [{ "pattern": "qr2bank.7zism3.me", "custom_domain": true }],
+  "assets": { "directory": "./public" }
+}

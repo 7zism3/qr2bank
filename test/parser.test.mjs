@@ -1,0 +1,12 @@
+import assert from 'node:assert';
+import { parseVietQR, crc16, buildDeeplink } from '../public/emvco-parser.js';
+const tlv = (t, v) => t + String(v.length).padStart(2, '0') + v;
+const t38 = tlv('38', tlv('00', 'A000000727') + tlv('01', tlv('00', '970407') + tlv('01', '19036712345678')) + tlv('02', 'QRIBFTTA'));
+const body = tlv('00', '02') + tlv('01', '12') + t38 + tlv('53', '704') + tlv('54', '50000') + tlv('58', 'VN') + tlv('62', tlv('08', 'cam on')) + '6304';
+const raw = body + crc16(body);
+const r = parseVietQR(raw);
+assert.deepEqual({ ...r }, { bin: '970407', account: '19036712345678', amount: '50000', note: 'cam on', service: 'QRIBFTTA', crcOk: true });
+assert.equal(buildDeeplink({ appId: 'tcb', bankCode: 'tcb', account: '1', amount: null, note: null, returnUrl: 'https://x.me/' }), 'https://dl.vietqr.io/pay?app=tcb&ba=1@tcb&url=https://x.me/');
+assert.equal(buildDeeplink({ appId: 'mb', bankCode: 'bidv', account: '1', amount: '0', note: 'NGUYEN VAN THUY ck' }), 'https://dl.vietqr.io/pay?app=mb&ba=1@bidv&am=0&tn=NGUYEN+VAN+THUY+ck');
+assert.equal(parseVietQR('hello'), null);
+console.log('OK');

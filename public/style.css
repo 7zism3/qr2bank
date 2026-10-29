@@ -1,0 +1,63 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: #000; color: #fff; font-family: system-ui, sans-serif; overflow: hidden; }
+[hidden] { display: none !important; }
+
+#scanView { position: fixed; inset: 0; }
+video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+.frame {
+  position: absolute; left: 50%; top: 42%; width: 64vmin; height: 64vmin; transform: translate(-50%, -50%);
+  border: 3px solid rgba(255, 255, 255, .8); border-radius: 24px; box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .45); pointer-events: none;
+}
+.status {
+  position: absolute; left: 0; right: 0; top: calc(42% + 36vmin); text-align: center; padding: 0 24px;
+  font-size: 15px; text-shadow: 0 1px 4px #000;
+}
+.status.err { color: #ff8a80; }
+.top {
+  position: absolute; top: calc(env(safe-area-inset-top) + 12px); left: 12px; right: 12px;
+  display: flex; justify-content: space-between;
+}
+.bottom {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(env(safe-area-inset-bottom) + 16vh);
+  background: linear-gradient(transparent, rgba(0, 0, 0, .75));
+}
+.round {
+  width: 48px; height: 48px; border-radius: 50%; border: 0; padding: 0; font-size: 22px; line-height: 1; color: #fff; background: rgba(255, 255, 255, .18);
+  display: inline-flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(6px);
+}
+.round.on { background: #ffd54f; }
+.pill {
+  border: 0; border-radius: 999px; padding: 12px 16px; font-size: 15px; color: #fff; background: rgba(255, 255, 255, .18);
+  backdrop-filter: blur(6px);
+}
+.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.zoom { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 22px; }
+.zoom input { flex: 1; accent-color: #4fc3f7; height: 32px; }
+
+#settingsView { position: fixed; inset: 0; padding: calc(env(safe-area-inset-top) + 12px) 16px 16px; background: #111; overflow: auto; }
+#settingsView header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+#settingsView h1 { font-size: 20px; margin: 0; }
+#settingsView label { display: block; margin-bottom: 8px; color: #bbb; }
+select {
+  width: 100%; padding: 14px; font-size: 16px; color: #fff; background: #222; border: 1px solid #444; border-radius: 12px;
+}
+.hint { color: #999; font-size: 13px; line-height: 1.5; }
+code { background: #222; padding: 1px 5px; border-radius: 4px; }
+.group { margin-bottom: 24px; }
+.install-card { margin-top: 48px; padding: 16px; border-radius: 16px; background: #1b1b1b; border: 1px solid #333; }
+.install-card h2 { font-size: 16px; margin: 0 0 8px; }
+.install { background: #0b5fff; display: block; width: 100%; font-weight: 600; }
+.sheet { position: fixed; inset: 0; z-index: 10; display: flex; align-items: flex-end; padding: 0 12px 32vh; background: rgba(0, 0, 0, .35); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.sheet form, #tapForm { width: 100%; padding: 20px 16px; background: #1b1b1b; border-radius: 20px; }
+.sheet h2 { font-size: 18px; margin: 0 0 4px; }
+.sheet label { display: block; margin: 14px 0 6px; color: #bbb; font-size: 14px; }
+.sheet input { width: 100%; padding: 14px; font-size: 18px; color: #fff; background: #222; border: 1px solid #444; border-radius: 12px; }
+.sheet .row { display: flex; gap: 8px; margin-top: 20px; }
+.sheet .row .pill { flex: 1; }
+.switch { display: flex !important; align-items: center; justify-content: space-between; gap: 16px; color: #fff !important; margin-bottom: 16px !important; }
+.switch small { display: block; margin-top: 4px; color: #999; font-size: 13px; line-height: 1.4; }
+.switch input { width: 48px; height: 28px; flex: none; accent-color: #0b5fff; }
+input.text { width: 100%; padding: 14px; font-size: 16px; color: #fff; background: #222; border: 1px solid #444; border-radius: 12px; }
+.sheet.center { align-items: center; padding: 12px; overflow-y: auto; }
+.about { margin-top: 32px; padding-top: 16px; border-top: 1px solid #2a2a2a; color: #777; font-size: 13px; line-height: 1.7; text-align: center; }
