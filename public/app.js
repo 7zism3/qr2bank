@@ -6,7 +6,7 @@ const store = {
   set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* ignore */ } },
   del: (k) => { try { localStorage.removeItem(k); } catch { /* ignore */ } },
 };
-const KEY = { app: 'q2b.appId', cam: 'q2b.deviceId', banks: 'q2b.banks', apps: 'q2b.apps', edit: 'q2b.edit', note: 'q2b.defNote' };
+const KEY = { app: 'q2b.appId', cam: 'q2b.deviceId', banks: 'q2b.banks', apps: 'q2b.apps', edit: 'q2b.edit', note: 'q2b.defNote', wallet: 'q2b.wallet', walletType: 'q2b.walletType', nogate: 'q2b.nogate' };
 const QR_SCANNER_URL = 'https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js';
 
 const video = $('video');
@@ -225,7 +225,7 @@ function handleResult(raw) {
 
 function go(t, gesture = false) {
   // Chrome Android chặn mở app (intent) khi trang chưa từng được chạm: cần 1 lần chạm (sticky activation).
-  if (!gesture && navigator.userActivation && !navigator.userActivation.hasBeenActive) {
+  if (!gesture && store.get(KEY.nogate) !== '1' && navigator.userActivation && !navigator.userActivation.hasBeenActive) {
     stopCamera();
     pendingGo = t;
     $('tap').hidden = false;
@@ -251,8 +251,10 @@ function fitSheet() {
 window.visualViewport?.addEventListener('resize', fitSheet);
 window.visualViewport?.addEventListener('scroll', fitSheet);
 let pendingGo = null;
-$('tapForm').addEventListener('submit', (e) => {
-  e.preventDefault();
+$('tapForm').addEventListener('submit', (e) => e.preventDefault());
+// Chạm bất kỳ đâu trên lớp phủ (trừ nút "Quét lại") là mở ngân hàng.
+$('tap').addEventListener('click', (e) => {
+  if (e.target.closest('#tapCancel')) return;
   $('tap').hidden = true;
   go(pendingGo, true);
 });
@@ -371,6 +373,8 @@ async function openSettings() {
   $('bankHint').textContent = store.get(KEY.app) ? `Đang dùng: ${store.get(KEY.app)}` : '';
 }
 
+$('nogateTgl').checked = store.get(KEY.nogate) === '1';
+$('nogateTgl').addEventListener('change', (e) => store.set(KEY.nogate, e.target.checked ? '1' : '0'));
 $('editTgl').checked = store.get(KEY.edit) === '1';
 $('defNote').value = store.get(KEY.note) || '';
 $('editTgl').addEventListener('change', (e) => store.set(KEY.edit, e.target.checked ? '1' : '0'));
@@ -441,10 +445,118 @@ $('installBtn').addEventListener('click', async () => {
   }
 });
 
+/* ---------- Smart Posture Routing: mở Ví thẻ khi cầm ngang / nằm phẳng ---------- */
+const WALLETS = { google: 'com.google.android.apps.walletnfcrel', samsung: 'com.samsung.android.spay' };
+
+$('walletTgl').checked = store.get(KEY.wallet) === '1';
+$('walletOpts').hidden = !$('walletTgl').checked;
+$('walletSel').value = store.get(KEY.walletType) || 'google';
+$('walletTgl').addEventListener('change', (e) => {
+  store.set(KEY.wallet, e.target.checked ? '1' : '0');
+  $('walletOpts').hidden = !e.target.checked;
+});
+$('walletSel').addEventListener('change', (e) => store.set(KEY.walletType, e.target.value));
+
+// Đọc góc máy đúng 1 lần, tối đa 150ms; không có dữ liệu thì coi như tư thế bình thường.
+function readOrientationOnce() {
+  return new Promise((resolve) => {
+    if (!('DeviceOrientationEvent' in window)) return resolve(null);
+    const done = (v) => {
+      clearTimeout(timer);
+      window.removeEventListener('deviceorientation', onEvt);
+      resolve(v);
+    };
+    const onEvt = (e) => done(e);
+    const timer = setTimeout(() => done(null), 150);
+    window.addEventListener('deviceorientation', onEvt, { once: true });
+  });
+}
+
+function isWalletPosture(e) {
+  const landscape = screen.orientation?.type?.startsWith('landscape');
+  if (landscape) return true;
+  if (!e || e.beta == null || e.gamma == null) return false;
+  return Math.abs(e.beta) < 25 || Math.abs(e.gamma) > 50;
+}
+
+// Trả true nếu đã chuyển hướng sang ví.
+async function routeByPosture() {
+  const url = new URL(location.href);
+  // Quay lại từ fallback (chưa cài ví / bị chặn): bỏ cờ rồi quét bình thường, tránh lặp vô hạn.
+  if (url.searchParams.has('nw')) {
+    url.searchParams.delete('nw');
+    history.replaceState(null, '', url.pathname + url.search);
+    return false;
+  }
+  if (store.get(KEY.wallet) !== '1') return false;
+  if (!isWalletPosture(await readOrientationOnce())) return false;
+  // Chrome chặn intent khi chưa có thao tác chạm: hiện nút để người dùng chạm rồi mới mở ví.
+  $('walletGate').hidden = false;
+  return true;
+}
+
+function walletPkg() {
+  return WALLETS[store.get(KEY.walletType)] || WALLETS.google;
+}
+function walletBack() {
+  const b = new URL(location.href);
+  b.searchParams.set('nw', '1');
+  return encodeURIComponent(b.href);
+}
+$('walletTest').addEventListener('click', () => openWallet());
+$('walletTestD').addEventListener('click', () => {
+  location.href = `intent://launch#Intent;scheme=samsungpay;package=com.samsung.android.spay;S.browser_fallback_url=${walletBack()};end`;
+});
+$('walletTestE').addEventListener('click', () => {
+  location.href = 'samsungpay://launch';
+});
+$('walletTestF').addEventListener('click', () => {
+  location.href = `intent://pay.google.com/gp/v/home#Intent;scheme=https;package=com.google.android.apps.walletnfcrel;S.browser_fallback_url=${walletBack()};end`;
+});
+$('sensorTest').addEventListener('click', async () => {
+  const out = $('sensorOut');
+  out.textContent = 'Đang đọc…';
+  try {
+    if (typeof DeviceOrientationEvent?.requestPermission === 'function') await DeviceOrientationEvent.requestPermission();
+  } catch { /* bỏ qua */ }
+  const e = await readOrientationOnce();
+  const r = (n) => (n == null ? 'null' : n.toFixed(1));
+  out.textContent =
+    `screen.orientation: ${screen.orientation?.type || 'không có'}\n` +
+    `DeviceOrientationEvent: ${'DeviceOrientationEvent' in window ? 'có' : 'không có'}\n` +
+    `Nhận sự kiện trong 150ms: ${e ? 'có' : 'KHÔNG'}\n` +
+    `beta=${r(e?.beta)}  gamma=${r(e?.gamma)}\n` +
+    `Kết luận: ${isWalletPosture(e) ? 'ĐÚNG tư thế mở ví' : 'KHÔNG phải tư thế mở ví'}`;
+});
+
+function openWallet() {
+  const back = walletBack();
+  if (store.get(KEY.walletType) !== 'samsung') {
+    location.href = `intent://pay.google.com/gp/v/home#Intent;scheme=https;package=com.google.android.apps.walletnfcrel;S.browser_fallback_url=${back};end`;
+    return;
+  }
+  // Samsung Wallet nguội không nhận link ngay: nhịp 1 đánh thức, nhịp 2 gọi lại nếu trang vẫn còn hiển thị.
+  location.href = `intent://launch#Intent;scheme=samsungpay;package=com.samsung.android.spay;S.browser_fallback_url=${back};end`;
+  setTimeout(() => {
+    if (!document.hidden) location.href = 'samsungpay://launch';
+  }, 1500);
+}
+$('walletForm').addEventListener('submit', (e) => e.preventDefault());
+// Chạm bất kỳ đâu (trừ nút "Quét QR") là mở ví.
+$('walletGate').addEventListener('click', (e) => {
+  if (e.target.closest('#walletSkip')) return;
+  openWallet();
+});
+$('walletSkip').addEventListener('click', () => {
+  $('walletGate').hidden = true;
+  startCamera();
+});
+
 /* ---------- Khởi động ---------- */
 refreshInstallUI();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 (async () => {
+  if (await routeByPosture()) return;
   startCamera();
   await initDecoder();
   await loadBanks();

@@ -48,8 +48,8 @@ code { background: #222; padding: 1px 5px; border-radius: 4px; }
 .install-card { margin-top: 48px; padding: 16px; border-radius: 16px; background: #1b1b1b; border: 1px solid #333; }
 .install-card h2 { font-size: 16px; margin: 0 0 8px; }
 .install { background: #0b5fff; display: block; width: 100%; font-weight: 600; }
-.sheet { position: fixed; inset: 0; z-index: 10; display: flex; align-items: flex-end; padding: 0 12px 32vh; background: rgba(0, 0, 0, .35); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
-.sheet form, #tapForm { width: 100%; padding: 20px 16px; background: #1b1b1b; border-radius: 20px; }
+.sheet { cursor: pointer; position: fixed; inset: 0; z-index: 10; display: flex; align-items: flex-end; padding: 0 12px 32vh; background: rgba(0, 0, 0, .35); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.sheet form, #tapForm, #walletForm { width: 100%; padding: 20px 16px; background: #1b1b1b; border-radius: 20px; }
 .sheet h2 { font-size: 18px; margin: 0 0 4px; }
 .sheet label { display: block; margin: 14px 0 6px; color: #bbb; font-size: 14px; }
 .sheet input { width: 100%; padding: 14px; font-size: 18px; color: #fff; background: #222; border: 1px solid #444; border-radius: 12px; }
@@ -60,4 +60,6 @@ code { background: #222; padding: 1px 5px; border-radius: 4px; }
 .switch input { width: 48px; height: 28px; flex: none; accent-color: #0b5fff; }
 input.text { width: 100%; padding: 14px; font-size: 16px; color: #fff; background: #222; border: 1px solid #444; border-radius: 12px; }
 .sheet.center { align-items: center; padding: 12px; overflow-y: auto; }
+#walletOpts .pill { margin: 4px 8px 4px 0; }
+#sensorOut { white-space: pre-wrap; margin: 8px 0 0; }
 .about { margin-top: 32px; padding-top: 16px; border-top: 1px solid #2a2a2a; color: #777; font-size: 13px; line-height: 1.7; text-align: center; }

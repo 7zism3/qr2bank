@@ -1,6 +1,6 @@
 {
   "name": "QR2Bank - Quick QR Scanner",
-  "short_name": "QR2Bank",
+  "short_name": "QR2Bank v2",
   "description": "Quét QR mở thẳng ứng dụng ngân hàng",
   "start_url": "./",
   "scope": "./",

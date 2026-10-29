@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#000000" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>QR2Bank</title>
+    <title>QR2Bank v2</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-v2-192.png" />
@@ -38,10 +38,21 @@
       </div>
     </main>
 
+    <div id="walletGate" class="sheet center" hidden>
+      <form id="walletForm">
+        <h2>Chạm bất kỳ đâu để mở Ví</h2>
+        <p class="hint">Máy đang ở tư thế ngang/nằm phẳng. Hoặc bấm "Quét QR" để quét như thường.</p>
+        <div class="row">
+          <button type="button" id="walletSkip" class="pill">Quét QR</button>
+          <button type="submit" class="pill install">Mở Ví</button>
+        </div>
+      </form>
+    </div>
+
     <div id="tap" class="sheet" hidden>
       <form id="tapForm">
         <h2 id="tapTitle">Đã quét xong</h2>
-        <p class="hint">Chạm để mở ngân hàng (Android yêu cầu một lần chạm để mở app).</p>
+        <p class="hint">Chạm bất kỳ đâu trên màn hình để mở ngân hàng.</p>
         <div class="row">
           <button type="button" id="tapCancel" class="pill">Quét lại</button>
           <button type="submit" class="pill install">Mở ngân hàng</button>
@@ -82,9 +93,34 @@
           <span>Cho sửa số tiền và nội dung<small>Hiện bảng nhập trước khi mở ngân hàng, kể cả khi QR đã có sẵn thông tin.</small></span>
           <input id="editTgl" type="checkbox" />
         </label>
+        <label class="switch" for="nogateTgl">
+          <span>Bỏ bước chạm, tự mở ngân hàng ngay (thử nghiệm)<small>Tắt bảng "Đã quét xong". Có thể ra trang lỗi nếu Chrome chặn mở app khi chưa chạm.</small></span>
+          <input id="nogateTgl" type="checkbox" />
+        </label>
         <label for="defNote">Nội dung chuyển khoản mặc định</label>
         <input id="defNote" class="text" maxlength="50" placeholder="VD: thanh toan" autocomplete="off" />
         <p class="hint">Dùng khi QR không có nội dung. Khi tắt "Cho sửa", QR không có số tiền sẽ mở ngân hàng với 0đ.</p>
+      </div>
+
+      <div class="group">
+        <label class="switch" for="walletTgl">
+          <span>Tự động mở Ví thẻ khi cầm máy ngang/nằm phẳng<small>Kiểm tra góc máy đúng 1 lần lúc mở app (không chạy cảm biến liên tục). Mặc định tắt.</small></span>
+          <input id="walletTgl" type="checkbox" />
+        </label>
+        <div id="walletOpts" hidden>
+          <label for="walletSel">Ví mục tiêu</label>
+          <select id="walletSel">
+            <option value="google">Google Wallet (mọi máy Android)</option>
+            <option value="samsung">Samsung Wallet (máy Samsung)</option>
+          </select>
+          <p class="hint">Nếu chưa cài ví này, app tự quay lại camera quét QR.</p>
+          <button type="button" id="walletTest" class="pill">Thử mở ví đã chọn</button>
+          <button type="button" id="walletTestD" class="pill">Thử D: intent scheme=samsungpay</button>
+          <button type="button" id="walletTestE" class="pill">Thử E: samsungpay://launch</button>
+          <button type="button" id="walletTestF" class="pill">Thử F: Google Wallet App Link</button>
+          <button type="button" id="sensorTest" class="pill">Kiểm tra cảm biến</button>
+          <pre id="sensorOut" class="hint"></pre>
+        </div>
       </div>
 
       <div class="group">
@@ -102,7 +138,7 @@
         <button id="installBtn" class="pill install" hidden>📲 Cài đặt ứng dụng</button>
         <p id="installHint" class="hint" hidden></p>
         <footer class="about">
-        <div>QR2Bank v1 · phiên bản 1.0.1</div>
+        <div>QR2Bank v2 · phiên bản 2.0.1</div>
         <div>Cập nhật: 29/10/2026</div>
         <div>Phát triển bởi: 7zism3</div>
       </footer>
